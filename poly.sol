@@ -14,8 +14,6 @@ import './erc20_token.sol';
 import './proposal.sol';
 import './tier.sol';
 
-// TODO: Allow cancelling support for a proposal.
-// TODO: Allow vetoing a proposal that's supported by others?
 contract Poly {
 
   address admin;
@@ -43,7 +41,13 @@ contract Poly {
   event Withdraw(
       Erc20Token indexed token,
       address indexed to,
-      uint256 value);
+      uint256 value,
+      Proposal proposal);
+  event StartWithdrawalDelay(
+      Erc20Token indexed token,
+      address indexed to,
+      uint256 value,
+      Proposal proposal);
 
   modifier unlockedOnly() {
     require(!locked);
@@ -170,6 +174,11 @@ contract Poly {
     require(passesApprovals(_proposal));
     require(delayStart[_proposal] == 0);
     delayStart[_proposal] = now;
+    StartWithdrawalDelay(
+        _proposal.token,
+        _proposal.recipient,
+        _proposal.amount,
+        _proposal);
   }
 
   // If a proposal is vetoed, the delay start can be reset so that any further
@@ -210,7 +219,7 @@ contract Poly {
     } else {
       token.transfer(recipient, amount);
     }
-    Withdraw(token, recipient, amount);
+    Withdraw(token, recipient, amount, _proposal);
   }
 
   function passesApprovals(
