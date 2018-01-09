@@ -93,7 +93,8 @@ contract Poly {
       external {
     require(_tier.locked());
     tiers.push(_tier);
-    tierIndices[_tier] = tiers.length - 1;
+    require(tiers.length + 1 == uint32(tiers.length + 1));
+    tierIndices[_tier] = uint32(tiers.length) - 1;
   }
 
   function setConstraint(
@@ -113,7 +114,7 @@ contract Poly {
       lockedOnly
       external
       returns (uint8 status) {
-    uint256 nextTier = numApprovedTiers[_proposal];
+    uint32 nextTier = numApprovedTiers[_proposal];
     if (nextTier == tiers.length) {
       // No more approvals needed.
       return 2;
@@ -196,10 +197,13 @@ contract Poly {
     uint256 start = delayStart[_proposal];
     require(requiredDelay == 0 || start != 0 && requiredDelay < now - start);
 
-    require(constraint.markWithdrawal(
+    Erc20Token token = _proposal.token();
+    address recipient = _proposal.recipient();
+    uint256 amount = _proposal.amount();
+    constraint.markWithdrawal(
         numApproved,
         token,
-        amount));
+        amount);
     // If `token` is `0x0`, then withdraw ether.
     if (token == address(0)) {
       recipient.transfer(amount);
@@ -224,7 +228,7 @@ contract Poly {
     address recipient = _proposal.recipient();
     uint256 amount = _proposal.amount();
     return constraint.allowWithdrawal(
-        tiers.length,
+        uint32(tiers.length),
         numApproved,
         token,
         recipient,

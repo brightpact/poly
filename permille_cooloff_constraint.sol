@@ -50,6 +50,7 @@ contract PermilleCooloffConstraint is Constraint {
   }
 
   function markWithdrawal(
+      uint32 /* _numApprovedTiers */,
       Erc20Token _token,
       uint256 _amount)
       polyOnly

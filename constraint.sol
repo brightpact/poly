@@ -17,6 +17,5 @@ contract Constraint {
       uint32 _numApprovedTiers,
       Erc20Token _token,
       uint256 _amount)
-      external
-      returns (bool success);
+      external;
 }

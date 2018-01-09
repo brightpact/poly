@@ -1,6 +1,7 @@
 pragma solidity ^0.4.19;
 
 import './constraint.sol';
+import './poly.sol';
 
 contract CompositeTieredConstraint is Constraint {
   address admin;
@@ -31,9 +32,11 @@ contract CompositeTieredConstraint is Constraint {
   }
 
   function CompositeTieredConstraint(
+      Poly _poly,
       uint32 _totalTiers)
       public {
     admin = msg.sender;
+    poly = _poly;
     constraints.length = _totalTiers;
   }
 
@@ -68,7 +71,7 @@ contract CompositeTieredConstraint is Constraint {
       view
       returns (bool allowed) {
     uint32 i = getConstraintIndex(_numApprovedTiers);
-    Constaint constraint = constraints[i];
+    Constraint constraint = constraints[i];
     return constraint.allowWithdrawal(
         _numApprovedTiers,
         _numApprovedTiers,
@@ -83,11 +86,10 @@ contract CompositeTieredConstraint is Constraint {
       uint256 _amount)
       external
       polyOnly
-      lockedOnly
-      returns (bool success) {
+      lockedOnly {
     uint32 i = getConstraintIndex(_numApprovedTiers);
     Constraint constraint = constraints[i];
-    return constraint.markWithdrawal(
+    constraint.markWithdrawal(
         _numApprovedTiers,
         _token,
         _amount);
@@ -98,7 +100,7 @@ contract CompositeTieredConstraint is Constraint {
       private
       view
       returns (uint32) {
-    return min(_numTiers - 1, constraints.length - 1);
+    return min(_numTiers - 1, uint32(constraints.length) - 1);
   }
 
   function min(
