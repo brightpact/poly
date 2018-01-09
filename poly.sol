@@ -175,9 +175,9 @@ contract Poly {
     require(delayStart[_proposal] == 0);
     delayStart[_proposal] = now;
     StartWithdrawalDelay(
-        _proposal.token,
-        _proposal.recipient,
-        _proposal.amount,
+        _proposal.token(),
+        _proposal.recipient(),
+        _proposal.amount(),
         _proposal);
   }
 
